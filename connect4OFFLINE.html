@@ -1,0 +1,104 @@
+<!DOCTYPE HTML>
+<head>
+    <style>
+        #grid {
+            border: 1px solid;
+            height: 600px;
+            width: 700px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .box {
+            height: 98px;
+            width: 98px;
+            border: 1px solid;
+            text-align: center;
+            font-size: 30px;
+            font-family: sans-serif;
+        }
+        .row {
+            display: flex;
+        }
+        .player-one {
+            background-color: red;
+        }
+        .player-two {
+            background-color: blue;
+        }
+    </style>
+    <script>
+        var gameGrid = [];
+        for(var a = 0; a < 6; a++){
+            gameGrid.push([]);
+            for(var b = 0; b < 7; b++){
+                gameGrid[a].push(null);
+            }
+        }
+        function checkWinner(board, playerNum){
+            for(var a = 0; a < board.length; a++){
+                for(var b = 0; b < board[a].length; b++){
+                    try{ if(board[a][b] === playerNum && board[a][b+1] === playerNum && board[a][b+2] === playerNum && board[a][b+3] === playerNum){return true;}}
+                    catch(error){}
+                    try{ if(board[a][b] === playerNum && board[a+1][b] === playerNum && board[a+2][b] === playerNum && board[a+3][b] === playerNum){return true;}}
+                    catch(error){}
+                    try{ if(board[a][b] === playerNum && board[a+1][b+1] === playerNum && board[a+2][b+2] === playerNum && board[a+3][b+3] === playerNum){return true;}}
+                    catch(error){}
+                    try{ if(board[a][b] === playerNum && board[a-1][b+1] === playerNum && board[a-2][b+2] === playerNum && board[a-3][b+3] === playerNum){return true;}}
+                    catch(error){}
+                    }
+                }
+            return false;
+        }
+        function drawBoard(board){
+            for(var a = 0; a < gridElement.children.length; a++){
+                var b = 0;
+                for(const box of Array.from(gridElement.children)[a].children){
+                    if(board[a][b] === 1){box.classList.add('player-one');}
+                    else{if(board[a][b] === 2){box.classList.add('player-two');}
+                }
+                b++;
+                }
+            }
+        }
+        function playPiece(column, playerNum){
+            if(gameGrid[0][column] === null){
+                for(var a = gameGrid.length - 1; a >= 0 ; a--){if(gameGrid[a][column] === null){gameGrid[a][column] = playerNum; break;}}
+                if(checkWinner(gameGrid, playerNum)){
+                    resultElement.innerHTML = 'Player ' + playerNum + ' wins!';
+                    gameOver = true;
+                    turnElement.innerText = '';
+                }
+                else{turnElement.innerText = 'Player ' + (!playerTurn? '1' : '2') + '\'s turn';}
+                drawBoard(gameGrid);
+                playerTurn = !playerTurn;
+            }
+        }
+
+        const gridElement = Object.assign(document.createElement('div'), {id: 'grid'});
+        const turnElement = Object.assign(document.createElement('h1'), {id: 'turn'});
+        const resultElement = Object.assign(document.createElement('h1'), {id: 'result'});
+        var playerTurn = true;
+        var gameOver = false;
+        
+        for(var a = 0; a < gameGrid.length; a++){
+            gridElement.appendChild(Object.assign(document.createElement('div'), {className: 'row'}));
+            for(var b = 0; b < 7; b++){
+                let box = Object.assign(document.createElement('div'), {className: 'box'})
+                if(a===0){box.innerText = (b+1).toString();}
+                box.onclick = () => {
+                    if(!box.classList.contains('played') && !gameOver){
+                        let columnInt = Array.from(box.parentNode.children).indexOf(box);
+                        for(var rowInt = gridElement.children.length - 1; rowInt >= 0; rowInt -= 1){
+                            let columnBox = Array.from(Array.from(gridElement.children)[rowInt].children)[columnInt];
+                            if(!columnBox.classList.contains('played')){
+                                columnBox.classList.add('played');
+                                if(playerTurn){playPiece(columnInt, 1);}
+                                else{playPiece(columnInt, 2);}
+                                break;
+                }}}}
+                gridElement.childNodes[gridElement.childNodes.length-1].appendChild(box);
+            }
+        }
+        window.onload = function(){document.body.replaceChildren(gridElement, turnElement, resultElement);};
+        </script>
+</head>
